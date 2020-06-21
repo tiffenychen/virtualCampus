@@ -1,35 +1,13 @@
-import GridItem from "../material-kit-components/Grid/GridItem";
-import GridContainer from "../material-kit-components/Grid/GridContainer";
+import GridItem from "../../material-kit-components/Grid/GridItem";
+import GridContainer from "../../material-kit-components/Grid/GridContainer";
 import React from "react";
-import Button from "../material-kit-components/CustomButtons/Button";
+import Button from "../../material-kit-components/CustomButtons/Button";
+import AddResourceMobile from "./AddResourceExpansion.js";
+import {ResourcesCard, Heading, CustomButton, TutorExpansionMapping} from "../..";
+import firebase from "../../../firebase";
+import {Descriptions} from "../../../assets/ResourcesData.js"
 
-import {ResourcesCard, Heading, CustomButton} from "..";
-import firebase from "../../firebase";
-import {Descriptions} from "../../assets/ResourcesData.js"
-
-const CoolerButton = ({children, ...other}) => {
-  const [isPushed, setIsPushed] = React.useState(true);
-  const otherClick = other.onClick.bind({});
-  const handleClick = () => {
-    setIsPushed(!isPushed);
-    otherClick();
-  }
-  delete other.onClick;
-
-  return (
-    <Button
-      onClick={() => {handleClick()}}
-      color={
-        (isPushed) ? "secondary" : "primary"
-      }
-      {...other}
-    >
-      {children}
-    </Button>
-  );
-}
-
-class ResourcesList extends React.Component {
+class ResourcesListMobile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -110,38 +88,6 @@ class ResourcesList extends React.Component {
     return res;
   }
 
-//this keeps track of whether or not the tag has been clicked
-  makeTagClick(resources) {
-        let val = {};
-        for (let i=0; i< resources.length; i+=1) {
-          let ele = resources[i];
-          let key = this.toTitleCase(ele['category']['category']);
-          let tag = ele['category']['tags'];
-
-          for(let j=0; j<tag.length; j++){
-            let tagName = this.toTitleCase(tag[j]);
-            //if category not added yet, add tag and resource
-            if(key in val== false){
-              val[key] = [tagName];
-              val[key][tagName] = false;
-            }
-            //if category is already added
-            else{
-              //if tag exists, add resource
-              if(val[key][tagName]){
-                  val[key][tagName].push(false);
-              }
-              //if tag doesn't exist, add tag and resource
-              else{
-                val[key].push(tagName);
-                val[key][tagName] = false;
-              }
-            }
-          }
-        }
-        return val;
-  }
-
   toTitleCase(str) {
     return str.replace(/\w\S*/g, function(txt){
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
@@ -168,17 +114,11 @@ class ResourcesList extends React.Component {
     }
   }
 
-//NEED TO EDIT
   setTagDisplay(category, tag) {
     this.setState({
       myResourcesDisplay: this.state.myTagsDict[category][tag]
     });
   }
-/*
-  setClickButton(category, tag){
-
-  }
-  */
   render() {
     return (
       <div>
@@ -216,46 +156,44 @@ class ResourcesList extends React.Component {
         <div style={{textAlign:'center', paddingTop: '15px', paddingLeft: '20px', paddingRight: '20px'}}>{this.state.myDescription}</div>
 
         <GridContainer style={{width: '100%'}}>
-          <GridItem xs={3} style={{textAlign:'center'}}>
-            <div style={{textAlign:'center', paddingTop: '80px', paddingBottom: '8px', fontSize:'18px'}}>{this.state.myTagsDescription}</div>
+          <GridItem style={{textAlign:'center', marginBottom:'34px'}}>
             {this.state.myTagsDisplay.map(data => {
               return (
-                <CoolerButton   style={{
+                <CustomButton text={data}
+                              color={'blue'}
+                              style={{
                                 marginTop: 8,
                                 marginBottom: 8,
                                 marginLeft: 10,
-                                fontSize: 'min(1.5vw, 9px)',
+                                fontSize: 'min(1.5vw, 9px)'
                               }}
                               onClick={this.setTagDisplay.bind(this, this.state.myCategory, data)}
-                >{data}</CoolerButton>
+                              value={{data}}
+                />
               );
             })}
-            <Heading color={'blue'} style={{fontSize: '28px', textAlign:'center', paddingTop: '30px'}}>{"Want to add your own resource?"}</Heading>
-            <div style={{textAlign:'center', paddingTop: '3%'}}>
-              <CustomButton text={"ADD RESOURCE"} href={"https://forms.gle/WWjyroMcnMsyp7Lv9"}
-                            color={"orange"} size={"large"} style={{marginTop: 10, marginBottom: 25}}/>
-            </div>
           </GridItem>
-          <GridItem xs={9}>
-          <GridContainer style={{paddingLeft: '20px', paddingRight: '20px', paddingTop: '50px'}}>
-            {this.state.myResourcesDisplay.map(data => {
-              return (
-                <GridItem xs={12} sm={6} md={4} style={{marginBottom: "40px", marginTop: "10px"}}>
-                  <ResourcesCard
-                    website={data.links.website}
-                    img={data.img}
-                    title={data.title}
-                    description={data.description}
-                    iosLink={data.links.iosLink}
-                    androidLink={data.links.androidLink}
-                    tags={data.category.tags}
-                    share
-                  />
-                </GridItem>
-              );
+          <AddResourceMobile />
+          <GridItem>
+            <GridContainer style={{paddingLeft: '30px'}}>
+              {this.state.myResourcesDisplay.map(data => {
+                return (
+                  <GridItem xs={12} sm={6} md={6} style={{marginBottom: "40px", marginTop: "10px"}}>
+                    <ResourcesCard
+                      website={data.links.website}
+                      img={data.img}
+                      title={data.title}
+                      description={data.description}
+                      iosLink={data.links.iosLink}
+                      androidLink={data.links.androidLink}
+                      tags={data.category.tags}
+                      share
+                    />
+                  </GridItem>
+                );
 
-            })}
-          </GridContainer>
+              })}
+            </GridContainer>
           </GridItem>
         </GridContainer>
       </div>
@@ -263,4 +201,4 @@ class ResourcesList extends React.Component {
   }
 }
 
-export default ResourcesList;
+export default ResourcesListMobile;
