@@ -7,19 +7,38 @@ import Button from "../../material-kit-components/CustomButtons/Button";
 import {ResourcesCard, Heading, CustomButton} from "../..";
 import ResourcesListFunctionality from "./ResourcesListFunctionality"
 import {CoolerButton} from "./ResourcesListFunctionality"
+import {CategButton} from "./ResourcesListFunctionality"
 
 class ResourcesListMobile extends ResourcesListFunctionality {
   constructor(props) {
     super(props);
   }
-
+  
   render() {
     return (
       <div>
         <div style={{textAlign:'center'}}>
           {Object.keys(this.state.myResourcesDict).sort().map(category => {
             return (
-              <Button size="medium"
+              <Button key = {category}
+              /* style={{
+                //background: 'rgba(255, 255, 255, 0.85)',
+                position: 'relative',
+                marginLeft:"2%",
+                marginRight:"2%",
+                marginTop: '3%',
+                //color: '#32a852',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 'normal',
+                fontSize: '13px',
+                lineHeight: '17px',
+              }}
+              onClick={this.setDisplay.bind(this, category)}
+              
+              otherClickOption={this.setDisplay.bind(this, category)} */
+              //category={this.state.myCategory}
+              size="medium"
                       active
                       style={{
                         background: 'rgba(255, 255, 255, 0.85)',
@@ -37,6 +56,7 @@ class ResourcesListMobile extends ResourcesListFunctionality {
                         color: '#0072CE'
                       }}
                       onClick={this.setDisplay.bind(this, category)}
+                      otherClickOption = {this.setDisplay.bind(this, category)}
                       value={{category}}
               >{category}</Button>
             );

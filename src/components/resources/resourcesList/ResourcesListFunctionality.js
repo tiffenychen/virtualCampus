@@ -23,6 +23,37 @@ export const CoolerButton = ({children, otherClickOption, category, key, ...othe
   return (
     <Button
       onClick={() => {handleClick()}}
+      color={(isPushed) ? "white" : "grey"}
+      {...other}
+    >
+      {children}
+    </Button>
+  );
+};
+/* export const CategButton = ({children, otherClickOption, category, key, ...other}) => {
+  var [isPushed, setIsPushed] = React.useState(true);
+  React.useEffect(() => {
+    setIsPushed(true);
+  }, [children, category, key]);
+  const otherClick = other.onClick.bind({});
+  const handleClick = () => {
+    setIsPushed(false);
+    
+    if(isPushed){
+      otherClick();
+      //console.log("isPushed true")
+    }
+    else{
+      otherClickOption();
+      //console.log("isPushed false")
+      
+    }
+  };
+  delete other.onClick;
+
+  return (
+    <Button
+      onClick={() => {handleClick()}}
       color={
         (isPushed) ? "white" : "grey"
       }
@@ -31,7 +62,8 @@ export const CoolerButton = ({children, otherClickOption, category, key, ...othe
       {children}
     </Button>
   );
-};
+}; */
+
 
 class ResourcesListFunctionality extends React.Component {
   constructor(props) {
@@ -49,7 +81,7 @@ class ResourcesListFunctionality extends React.Component {
       defaultSearchInput: ''
     };
     this.getResources();
-
+    
 //    this.searchFunc = this.searchFunc.bind(this);
 //    this.setSearchInput = this.setSearchInput.bind(this);
   }
@@ -67,12 +99,15 @@ class ResourcesListFunctionality extends React.Component {
       allResources = approvedResources.docs.map(doc => doc.data());
       approvedResourcesDict = this.makeDisplayResources(allResources);
       approvedTagsDict = this.makeDisplayTags(allResources);
+      
     }
-    approvedTagsDict['All Resources'] = [];
-    console.log(approvedTagsDict);
     this.setState({ myResourcesDict: approvedResourcesDict});
     this.setState({ myResourcesDisplay: allResources});
     this.setState({ myTagsDict: approvedTagsDict});
+    if(this.state.myTagsDict != null &&this.state.myTagsDict != "undefined" && this.state.myTagsDict[this.state.myCategory] != "undefined"&& this.state.myTagsDict[this.state.myCategory] != null){
+      this.setDisplay(this.state.myCategory);
+    }
+    
   }
 
   // Creates mapping of category to corresponding resources
@@ -95,6 +130,7 @@ class ResourcesListFunctionality extends React.Component {
   // Creates nested mapping of category to tag to corresponding resources
   makeDisplayTags(resources) {
     let res = {};
+    let allres = {}
     for (let i = 0; i < resources.length; i += 1) {
       let ele = resources[i];
       let key = this.toTitleCase(ele['category']['category']);
@@ -120,7 +156,55 @@ class ResourcesListFunctionality extends React.Component {
         }
       }
     }
-    return res;
+    
+    allres = this.addAllTags(res);
+    this.approvedTagsDict = allres;
+    return allres;
+  }
+  addAllTags(res){ 
+    var allres = {}
+    allres["All Resources"] = {}; 
+    
+      for (var categ in res) {
+        for(var tag in res[categ]){
+          tag = this.toTitleCase(tag)
+          var resources = res[categ][tag]
+          //deep copy of res to allres
+          if(!(categ in allres)){
+            allres[categ] = {}
+            allres[categ][tag] = resources    
+          }
+          else{
+            // if tag exists, add resource
+            if(tag in allres[categ]){
+                allres[categ][tag].push(resources);
+            }
+            // if tag doesn't exist, add tag and resource
+            else{
+              allres[categ][tag] = resources
+            }
+          }
+          //adds tags in allres
+          if(tag in allres["All Resources"]){
+            var curr = new Array()
+            curr = allres["All Resources"][tag]
+            var newres = new Array()
+            newres = allres[categ][tag]
+            var finres = curr.concat(newres) 
+            allres["All Resources"][tag] = finres
+            
+          }
+          else{
+            allres["All Resources"][tag] = {}
+            allres["All Resources"][tag] = resources
+          }
+          
+        }
+
+        
+      } 
+      
+      return allres   
   }
 
   // Button categories are uppercase
@@ -141,18 +225,22 @@ class ResourcesListFunctionality extends React.Component {
         myCategory: category,
         myTagsDisplay: Object.keys(this.state.myTagsDict[category]),
         myTagsResourcesDisplay: {},
+        myTagsDescription: "Filter by tags: ",
     });
+    this.CategDisplay(category)
+  }
 
-    if(category !== 'All Resources'){
-      this.setState({
-        myTagsDescription: "Filter by tags: "
-      });
-    }
-    else{
-      this.setState({
-        myTagsDescription: ""
-      });
-    }
+  CategDisplay(category){
+    console.log(this.state.myResourcesDict)
+    //for(categ in Object.keys(this.state.myResourcesDict))
+    //{
+      //if(categ == category){
+      //  console.log("Categ found ")
+      //}
+      //else{
+      //  console.log("Diff categ")
+      //}
+    //}
   }
 
   setTagDisplay(category, tag) {
