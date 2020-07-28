@@ -36,6 +36,7 @@ export const CoolerButton = ({children, otherClickOption, category, key, val, ..
 
 class ResourcesListFunctionality extends React.Component {
   constructor(props) {
+    console.log("Functionality constructor reached")
     super(props);
     this.state = {
       activityIndicator: true,
@@ -47,10 +48,33 @@ class ResourcesListFunctionality extends React.Component {
       tagsDisplay: [],
       tagsDescription: "Filter by tags: ",
       tagsResourcesDisplay: {},
-      searchError: ""
+      searchError: "",
+      selected: {'Tags':[]}, //, 'category': category
     };
     this.getResources();
-  }
+    if (this.state.selected == undefined)
+    {
+      this.state = {
+        selected: {'category':"All Resources",'Tags':[] },
+      };
+    }
+    else{
+      //setting category
+       if (this.state.selected.category != undefined){
+         this.setDisplay(this.state.selected.category)
+       }
+      //setting tags 
+      if(this.state.selected.tags !=undefined){
+        for(var i = 0; i < this.state.selected.tags.length;i++){
+        this.setTagDisplay(this.state.selected.category, this.state.selected.tags[i])
+      }
+      }
+      
+    }
+    console.log("Functionality Constructor Reached")
+    console.log("Category" + this.state.category)
+    console.log(this.state.selected)
+  } 
 
   // Get resources from Firestore
   // Set initial resources/tags and display on website
@@ -149,8 +173,18 @@ class ResourcesListFunctionality extends React.Component {
       category: category,
       tagsDisplay: Object.keys(this.state.tagsDict[category]),
       tagsResourcesDisplay: {},
-    });
 
+      //selected: {category: category, tags: selected[tags]},
+    });
+    this.state.selected.category = category;
+    console.log("Selected Category updated")
+    let entries = Object.entries(this.state.selected);
+    entries.map( ([prop, val]) => console.log(prop, val));
+    /* console.log(category)
+    console.log(this.state.category)
+    console.log(this.state.selected)
+    console.log(this.state.selected.category) */
+    
     this.setState({
       tagsDescription: "Filter by tags: "
     });
@@ -159,11 +193,36 @@ class ResourcesListFunctionality extends React.Component {
   setTagDisplay(category, tag) {
     this.state.tagsResourcesDisplay[tag] = this.state.tagsDict[category][tag];
     this.renderTagDisplay(category)
+    if(this.state.selected.tags==undefined){
+      this.state.selected.tags =[tag]
+    }
+    else{
+      this.state.selected.tags.push(tag)
+    }
+    if(tag!=undefined){
+      console.log("Tag has value")
+      console.log(tag)
+    }
+    let entries = Object.entries(this.state.selected);
+    entries.map( ([prop, val]) => console.log(prop, val));
+    /* console.log(this.state.selected[tags])
+    console.log("Selected tags updated/being set")
+    console.log(this.state.selected)
+    console.log(this.state.selected.tags) */
   }
 
   deleteTagDisplay(category, tag) {
     delete this.state.tagsResourcesDisplay[tag];
     this.renderTagDisplay(category)
+    for (var i =0;i<this.state.selected.tags.length;i++){
+      if (this.state.selected.tags[i]==tag)
+      {
+        this.state.selected.tags.splice(i,1);
+        console.log("Value found")
+        break;
+      }
+    }
+    console.log(this.state.selected.tags)
   }
 
   renderTagDisplay(category) {

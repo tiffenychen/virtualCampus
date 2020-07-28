@@ -17,6 +17,8 @@ class ResourcesListDesktop extends ResourcesListFunctionality {
     return (
       <div>
         <div style={{textAlign:'center'}}>
+          {console.log(Object.keys)}
+          {console.log(this.state.resourcesDict)}
           {Object.keys(this.state.resourcesDict).sort().map(category => {
             return (
               <Button size="medium"

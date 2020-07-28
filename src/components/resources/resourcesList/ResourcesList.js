@@ -9,6 +9,8 @@ class ResourcesList extends React.Component {
     super(props);
     this.state = { width: 0, height: -1 };
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    //console.log("Tada" + this.category)
+    //this.setDisplay = this.setDisplay.bind(this,this.category)
   }
 
   componentDidMount() {
