@@ -45,14 +45,15 @@ class ResourcesListFunctionality extends React.Component {
       activityIndicator: true,
       category: "All Resources",
       description: "Resources that promote career, foster health, encourage social connection, support basic needs, and raise awareness of COVID.",
+      event: {},
+      gridView: true,
       resourcesDict: {},
       resourcesDisplay: [],
       tagsDict: {},
       tagsDisplay: [],
       tagsResourcesDisplay: {},
       searchError: "",
-      selection: 1,
-      event: {}
+      selection: 1
     };
     this.getResources();
   }
@@ -63,9 +64,8 @@ class ResourcesListFunctionality extends React.Component {
   */
   async getResources() {
     let approvedResourcesDict = {"All Resources":[]};
-    let allResources = [];
     try{
-      
+
       let db = firebase.firestore();
       // let approvedResources = await db.collection("resources").where("reviewed", "==", true).get();
       let arr = [];
@@ -83,11 +83,14 @@ class ResourcesListFunctionality extends React.Component {
         let categoryResources = [];
         // changed the loop to retrieve from resource by iterating through each category
         let name = arr[i];
-        let template = "/resource/" + name + "/" + name;
+        let template = "/resource/" + name + "/resources";
         let all_reviewed = await db.collection(template).where("reviewed", "==", true).get();
 
         all_reviewed.forEach(doc =>
         {
+          if (doc.data()["title"] === "Duolingo"){
+            console.log(doc.data())
+          }
           categoryResources.push(doc.data());
           approvedResourcesDict["All Resources"].push(doc.data());
         });
@@ -97,7 +100,7 @@ class ResourcesListFunctionality extends React.Component {
 
       this.setState({
         activityIndicator: false,
-        resourcesDict: approvedResourcesDict,
+        resourcesDict: approvedResourcesDict
       });
       this.setDisplay('All Resources');
     }
@@ -140,6 +143,25 @@ class ResourcesListFunctionality extends React.Component {
     });
   }
 
+  /**
+  * Renders resources when a category is deselected
+  */
+ deleteDisplay() {
+    let resources = this.state.resourcesDict["All Resources"];
+    let tagsDict = this.makeTags(resources);
+    this.setState({
+      resourcesDisplay: resources,
+      description: Descriptions["All Resources"],
+      category: "All Resources",
+      tagsDict: tagsDict,
+      tagsDisplay: Object.keys(tagsDict),
+      tagsResourcesDisplay: {},
+      selection: 1
+    });
+
+  }
+
+  
   /**
   * Make tag buttons based on the resources that are currently displayed
   * @param  {[]} resources: Category name
@@ -204,6 +226,7 @@ class ResourcesListFunctionality extends React.Component {
         this.handleChange(this.state.event);
       });
     }
+    console.log(this.state.resourcesDisplay)
   }
 
   /**
@@ -211,6 +234,8 @@ class ResourcesListFunctionality extends React.Component {
   * @param  {String} val: Query that's typed into the search bar
   */
   searchFunc(val) {
+    console.log("VAL: ")
+    console.log(val)
     let resources = [];
     let category = this.state.category;
     let allResources = this.state.resourcesDict[category];
@@ -247,6 +272,7 @@ class ResourcesListFunctionality extends React.Component {
     }, function () {
       this.handleChange(this.state.event);
     });
+    console.log(this.state.resourcesDisplay)
   }
 
   /**
@@ -254,33 +280,60 @@ class ResourcesListFunctionality extends React.Component {
   * @param  event: Received from <Search> element that has the value of the filter sort
   */
   handleChange = (event, index, value) => {
-    // alphabetical sort
-    if (event.target!== undefined && event.target.value === 2){
-      let array = this.state.resourcesDisplay;
-      array.sort(function(a, b){
-        let titleA=a.title.toLowerCase(), titleB=b.title.toLowerCase();
-        if(titleA < titleB){
-          return -1;
+    if (event!== undefined && event.target!== undefined){
+      if(event.target.value === 1){
+        this.setState({
+          event: event,
+          selection: event.target.value
+        });
+      }
+      else{
+        let array = this.state.resourcesDisplay;
+        // alphabetical sort
+        if (event.target.value === 2){
+          array.sort(function(a, b){
+            let titleA=a.title.toLowerCase(), titleB=b.title.toLowerCase();
+            if(titleA < titleB){
+              return -1;
+            }
+            if(titleA > titleB){
+              return 1;
+            }
+            return 0;
+          });
         }
-        if(titleA > titleB){
-          return 1;
+        // popularity sort
+        else if (event.target.value === 3){
+          console.log("popular sort")
+          array.sort(function(a, b){
+            if (a.ranking > b.ranking){
+              return -1;
+            }
+            if (a.ranking < b.ranking){
+              return 1;
+            }
+            return 0;
+          });
         }
-        return 0;
-      });
-      this.setState({
-        event: event,
-        resourcesDisplay: array,
-        selection: event.target.value
-      });
+        // time added sort
+        else if (event.target.value === 4){
+          array.sort(function(a, b){
+            if (a.dateCreated > b.dateCreated){
+              return -1;
+            }
+            if (a.dateCreated < b.dateCreated){
+              return 1;
+            }
+            return 0;
+          });
+        }
+        this.setState({
+          event: event,
+          resourcesDisplay: array,
+          selection: event.target.value
+        });
+      }
     }
-
-    else if(event.target!==undefined && event.target.value === 1){
-      this.setState({
-        event: event,
-        selection: event.target.value
-      });
-    }
-
   }
 }
 
